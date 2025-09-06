@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-class Program
+class CompletedAssignmet2
 {
     static string[] lines;
 
