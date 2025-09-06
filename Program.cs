@@ -20,68 +20,101 @@ class Program
             Console.Write("Enter your choice: ");
             string choice = Console.ReadLine();
 
-            switch (choice)
+            if (choice == "1")
             {
-                case "1":
-                    DisplayAllCharacters(lines);
-                    break;
-                case "2":
-                    AddCharacter(ref lines);
-                    break;
-                case "3":
-                    LevelUpCharacter(lines);
-                    break;
-                case "4":
-                    return;
-                default:
-                    Console.WriteLine("Invalid choice. Please try again.");
-                    break;
+                DisplayAllCharacters(lines);
+            }
+            else if (choice == "2")
+            {
+                AddCharacter(ref lines);
+                File.WriteAllLines(filePath, lines);
+            }
+            else if (choice == "3")
+            {
+                LevelUpCharacter(lines);
+                File.WriteAllLines(filePath, lines); 
+            }
+            else if (choice == "4")
+            {
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Invalid choice. Please try again.");
             }
         }
     }
 
     static void DisplayAllCharacters(string[] lines)
     {
-        // Skip the header row
-        for (int i = 1; i < lines.Length; i++)
+        for (int i = 1; i < lines.Length; i++) 
         {
             string line = lines[i];
+            string name = "";
+            string characterClass = "";
+            int level = 0;
+            int hitPoints = 0;
+            string[] equipment;
 
-            string name;
-            int commaIndex;
-
-            // Check if the name is quoted
             if (line.StartsWith("\""))
             {
-                // TODO: Find the closing quote and the comma right after it
-                // TODO: Remove quotes from the name if present and parse the name
-                // name = ...
+                int closingQuoteIndex = line.IndexOf('"', 1);
+                name = line.Substring(1, closingQuoteIndex - 1);
+
+                string rest = line.Substring(closingQuoteIndex + 2);
+                string[] fields = rest.Split(',');
+
+                characterClass = fields[0];
+                level = int.Parse(fields[1]);
+                hitPoints = int.Parse(fields[2]);
+                equipment = fields[3].Split('|');
             }
             else
             {
-                // TODO: Name is not quoted, so store the name up to the first comma
-                // name =
+                string[] fields = line.Split(',');
+                name = fields[0];
+                characterClass = fields[1];
+                level = int.Parse(fields[2]);
+                hitPoints = int.Parse(fields[3]);
+                equipment = fields[4].Split('|');
             }
 
-            // TODO: Parse characterClass, level, hitPoints, and equipment
-            // string characterClass = ...
-            // int level = ...
-            // int hitPoints = ...
-
-            // TODO: Parse equipment noting that it contains multiple items separated by '|'
-            // string[] equipment = ...
-
-            // Display character information
-            // Console.WriteLine($"Name: {name}, Class: {characterClass}, Level: {level}, HP: {hitPoints}, Equipment: {string.Join(", ", equipment)}");
+            Console.WriteLine($"Name: {name}, Class: {characterClass}, Level: {level}, HP: {hitPoints}, Equipment: {string.Join(", ", equipment)}");
         }
     }
 
     static void AddCharacter(ref string[] lines)
     {
-        // TODO: Implement logic to add a new character
-        // Prompt for character details (name, class, level, hit points, equipment)
-        // DO NOT just ask the user to enter a new line of CSV data or enter the pipe-separated equipment string
-        // Append the new character to the lines array
+        Console.Write("Enter character name: ");
+        string name = Console.ReadLine();
+        if (name.Contains(","))
+        { 
+            name = "\"" + name + "\"";
+        }
+
+        Console.Write("Enter character class: ");
+        string characterClass = Console.ReadLine();
+
+        Console.Write("Enter level: ");
+        int level = int.Parse(Console.ReadLine());
+
+        Console.Write("Enter hit points: ");
+        int hitPoints = int.Parse(Console.ReadLine());
+
+        Console.Write("Enter equipment items separated by commas: ");
+        string equipmentInput = Console.ReadLine();
+        string[] equipment = equipmentInput.Split(',');
+        for (int i = 0; i < equipment.Length; i++)
+        {
+            equipment[i] = equipment[i].Trim();
+        }
+
+        string newLine = name + "," + characterClass + "," + level + "," + hitPoints + "," + string.Join("|", equipment);
+
+        Array.Resize(ref lines, lines.Length + 1);
+        lines[lines.Length - 1] = newLine;
+
+        Console.WriteLine("Character added successfully!");
     }
 
     static void LevelUpCharacter(string[] lines)
@@ -89,28 +122,54 @@ class Program
         Console.Write("Enter the name of the character to level up: ");
         string nameToLevelUp = Console.ReadLine();
 
-        // Loop through characters to find the one to level up
         for (int i = 1; i < lines.Length; i++)
         {
             string line = lines[i];
+            string name = "";
+            string characterClass = "";
+            int level = 0;
+            int hitPoints = 0;
+            string equipmentField = "";
 
-            // TODO: Check if the name matches the one to level up
-            // Do not worry about case sensitivity at this point
-            if (line.Contains(nameToLevelUp))
+            if (line.StartsWith("\""))
             {
+                int closingQuoteIndex = line.IndexOf('"', 1);
+                name = line.Substring(1, closingQuoteIndex - 1);
+                string rest = line.Substring(closingQuoteIndex + 2);
+                string[] fields = rest.Split(',');
 
-                // TODO: Split the rest of the fields locating the level field
-                // string[] fields = ...
-                // int level = ...
+                characterClass = fields[0];
+                level = int.Parse(fields[1]);
+                hitPoints = int.Parse(fields[2]);
+                equipmentField = fields[3];
+            }
+            else
+            {
+                string[] fields = line.Split(',');
+                name = fields[0];
+                characterClass = fields[1];
+                level = int.Parse(fields[2]);
+                hitPoints = int.Parse(fields[3]);
+                equipmentField = fields[4];
+            }
 
-                // TODO: Level up the character
-                // level++;
-                // Console.WriteLine($"Character {name} leveled up to level {level}!");
+            if (name == nameToLevelUp)
+            {
+                level++;
+                Console.WriteLine("Character " + name + " leveled up to level " + level + "!");
 
-                // TODO: Update the line with the new level
-                // lines[i] = ...
-                break;
+                if (line.StartsWith("\""))
+                {
+                    lines[i] = "\"" + name + "\"," + characterClass + "," + level + "," + hitPoints + "," + equipmentField;
+                }
+                else
+                {
+                    lines[i] = name + "," + characterClass + "," + level + "," + hitPoints + "," + equipmentField;
+                }
+                return;
             }
         }
+
+        Console.WriteLine("Character not found.");
     }
 }
