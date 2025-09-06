@@ -5,7 +5,7 @@ class Program
 {
     static string[] lines;
 
-    static void Main()
+    static void Main()  
     {
         string filePath = "input.csv";
         lines = File.ReadAllLines(filePath);
