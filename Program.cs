@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-
+//additional comment for finished assignment
 class Program
 {
     static string[] lines;
